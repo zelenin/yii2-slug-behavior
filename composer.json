@@ -1,7 +1,7 @@
 {
 	"name": "zelenin/yii2-slug-behavior",
 	"description": "Yii2 slug behavior",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"type": "yii2-extension",
 	"keywords": ["yii", "yii2", "slug", "behavior"],
 	"homepage": "https://github.com/zelenin/yii2-slug-behavior",
@@ -21,7 +21,8 @@
 	},
 	"require": {
 		"php": ">=5.4.0",
-		"yiisoft/yii2": "*"
+		"yiisoft/yii2": "*",
+		"2amigos/yii2-transliterator-helper": "*"
 	},
 	"autoload": {
 		"psr-4": {
