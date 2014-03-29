@@ -1,8 +1,12 @@
 <?php
+/**
+ * @copyright Aleksandr Zelenin <aleksandr@zelenin.me>
+ */
 namespace Zelenin\yii\behaviors;
 
 use dosamigos\transliterator\TransliteratorHelper;
 use yii\base\Behavior;
+use yii\base\Model;
 use yii\db\ActiveRecord;
 use yii\helpers\Inflector;
 use yii\validators\UniqueValidator;
@@ -26,7 +30,9 @@ class Slug extends Behavior
 
     public function processSlug($event)
     {
-        $attribute = empty($this->owner->{$this->slug_attribute}) ? $this->source_attribute : $this->slug_attribute;
+        $attribute = empty($this->owner->{$this->slug_attribute})
+            ? $this->source_attribute
+            : $this->slug_attribute;
         $this->generateSlug($this->owner->{$attribute});
     }
 
@@ -53,11 +59,14 @@ class Slug extends Behavior
     {
         $string = preg_replace('/[^\p{L}\p{Nd}]+/u', $this->replacement, $string);
         $string = trim($string, $this->replacement);
-        return $this->lowercase ? strtolower($string) : $string;
+        return $this->lowercase
+            ? strtolower($string)
+            : $string;
     }
 
     private function checkUniqueSlug()
     {
+        /** @var Model $model */
         $model = clone $this->owner;
         $uniqueValidator = new UniqueValidator;
         $uniqueValidator->validateAttribute($model, $this->slug_attribute);
