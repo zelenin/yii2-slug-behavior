@@ -20,6 +20,7 @@ class Slug extends Behavior
     public $replacement = '-';
     public $lowercase = true;
     public $unique = true;
+    public $relation_delimiter = '.';
 
     public function events()
     {
@@ -33,7 +34,36 @@ class Slug extends Behavior
         $attribute = empty($this->owner->{$this->slug_attribute})
             ? $this->source_attribute
             : $this->slug_attribute;
-        $this->generateSlug($this->owner->{$attribute});
+
+        if (!is_array($attribute))
+            $this->generateSlug($this->sourceAttribute($attribute));
+        else
+            $this->generateSlug($this->sourceAttributeComponents($attribute));
+    }
+
+    private function sourceAttribute($attribute)
+    {
+        $components = explode($this->relation_delimiter, $attribute);
+
+        if (!is_array($components) || count($components) == 0)
+            return '';
+
+        $content = $this->owner->{$components[0]};
+        for ($i = 1; $i < count($components); $i++) {
+            $content = $content->{$components[$i]};
+        }
+
+        return $content;
+    }
+
+    private function sourceAttributeComponents($attributeNames)
+    {
+        $attributes = [];
+        foreach ($attributeNames as $attribute) {
+            $attributes[] = $this->sourceAttribute($attribute);
+        }
+
+        return implode($this->replacement, $attributes);
     }
 
     private function generateSlug($slug)
