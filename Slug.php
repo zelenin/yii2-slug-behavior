@@ -8,7 +8,7 @@ use dosamigos\transliterator\TransliteratorHelper;
 use yii\base\Behavior;
 use yii\base\Model;
 use yii\db\ActiveRecord;
-use yii\helpers\Inflector;
+use yii\helpers\ArrayHelper;
 use yii\validators\UniqueValidator;
 
 class Slug extends Behavior
@@ -20,7 +20,6 @@ class Slug extends Behavior
     public $replacement = '-';
     public $lowercase = true;
     public $unique = true;
-    public $relation_delimiter = '.';
 
     public function events()
     {
@@ -34,35 +33,17 @@ class Slug extends Behavior
         $attribute = empty($this->owner->{$this->slug_attribute})
             ? $this->source_attribute
             : $this->slug_attribute;
-
-        if (!is_array($attribute))
-            $this->generateSlug($this->sourceAttribute($attribute));
-        else
-            $this->generateSlug($this->sourceAttributeComponents($attribute));
+        is_array($attribute)
+            ? $this->generateSlug($this->getAttributeComponents($attribute))
+            : $this->generateSlug($attribute);
     }
 
-    private function sourceAttribute($attribute)
-    {
-        $components = explode($this->relation_delimiter, $attribute);
-
-        if (!is_array($components) || count($components) == 0)
-            return '';
-
-        $content = $this->owner->{$components[0]};
-        for ($i = 1; $i < count($components); $i++) {
-            $content = $content->{$components[$i]};
-        }
-
-        return $content;
-    }
-
-    private function sourceAttributeComponents($attributeNames)
+    private function getAttributeComponents($attributeNames)
     {
         $attributes = [];
         foreach ($attributeNames as $attribute) {
-            $attributes[] = $this->sourceAttribute($attribute);
+            $attributes[] = ArrayHelper::getValue($this->owner, $attribute);
         }
-
         return implode($this->replacement, $attributes);
     }
 
@@ -81,7 +62,7 @@ class Slug extends Behavior
     private function slugify($slug)
     {
         return $this->translit
-            ? Inflector::slug(TransliteratorHelper::process($slug), $this->replacement, $this->lowercase)
+            ? $this->slug(TransliteratorHelper::process($slug))
             : $this->slug($slug);
     }
 

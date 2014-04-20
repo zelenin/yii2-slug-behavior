@@ -18,23 +18,50 @@ or add
 
 to the require section of your composer.json
 
+### Using
+
 Attach the behavior in your model:
 
 ```php
 public function behaviors()
 {
-	return [
-		'slug' => [
-			'class' => 'Zelenin\yii\behaviors\Slug',
-			'source_attribute' => 'name',
-			'slug_attribute' => 'slug',
-			// optional params
-			'translit' => true,
-			'replacement' => '-',
-			'lowercase' => true,
-			'unique' => true
-		]
-	];
+    return [
+        'slug' => [
+            'class' => 'Zelenin\yii\behaviors\Slug',
+            'source_attribute' => 'name',
+            'slug_attribute' => 'slug',
+
+            // optional params
+            'translit' => true,
+            'replacement' => '-',
+            'lowercase' => true,
+            'unique' => true
+        ]
+    ];
+}
+```
+
+Slug may be generated from multiple and related attributes:
+
+```php
+public function behaviors()
+{
+    return [
+        'slug' => [
+            'class' => 'Zelenin\yii\behaviors\Slug',
+            'source_attribute' => [
+                'name',
+                'language.name'
+            ],
+            'slug_attribute' => 'slug',
+
+            // optional params
+            'translit' => true,
+            'replacement' => '-',
+            'lowercase' => true,
+            'unique' => true
+        ]
+    ];
 }
 ```
 
