@@ -35,7 +35,7 @@ class Slug extends Behavior
             : $this->slug_attribute;
         is_array($attribute)
             ? $this->generateSlug($this->getAttributeComponents($attribute))
-            : $this->generateSlug($attribute);
+            : $this->generateSlug($this->owner->$attribute);
     }
 
     private function getAttributeComponents($attributeNames)
