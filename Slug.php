@@ -1,15 +1,12 @@
 <?php
-/**
- * @copyright Aleksandr Zelenin <aleksandr@zelenin.me>
- */
+
 namespace Zelenin\yii\behaviors;
 
 use dosamigos\transliterator\TransliteratorHelper;
 use yii\base\Behavior;
-use yii\base\Model;
+use yii\base\DynamicModel;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
-use yii\validators\UniqueValidator;
 
 class Slug extends Behavior
 {
@@ -77,10 +74,10 @@ class Slug extends Behavior
 
     private function checkUniqueSlug()
     {
-        /** @var Model $model */
-        $model = clone $this->owner;
-        $uniqueValidator = new UniqueValidator;
-        $uniqueValidator->validateAttribute($model, $this->slug_attribute);
+        $model = DynamicModel::validateData(
+            [$this->slug_attribute => $this->owner->{$this->slug_attribute}],
+            [[$this->slug_attribute, 'unique', 'targetClass' => $this->owner]]
+        );
         return !$model->hasErrors($this->slug_attribute);
     }
 }
