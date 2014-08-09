@@ -10,14 +10,23 @@ use yii\helpers\ArrayHelper;
 
 class Slug extends Behavior
 {
+    /** @var string|array $source_attribute */
     public $source_attribute = 'name';
+    /** @var string $slug_attribute */
     public $slug_attribute = 'slug';
 
+    /** @var bool $translit */
     public $translit = true;
+    /** @var string $replacement */
     public $replacement = '-';
+    /** @var bool $lowercase */
     public $lowercase = true;
+    /** @var bool $unique */
     public $unique = true;
 
+    /**
+     * @inheritdoc
+     */
     public function events()
     {
         return [
@@ -25,6 +34,9 @@ class Slug extends Behavior
         ];
     }
 
+    /**
+     * @param $event
+     */
     public function processSlug($event)
     {
         $attribute = empty($this->owner->{$this->slug_attribute})
@@ -35,6 +47,10 @@ class Slug extends Behavior
             : $this->generateSlug($this->owner->$attribute);
     }
 
+    /**
+     * @param array $attributeNames
+     * @return string
+     */
     private function getAttributeComponents($attributeNames)
     {
         $attributes = [];
@@ -44,6 +60,9 @@ class Slug extends Behavior
         return implode($this->replacement, $attributes);
     }
 
+    /**
+     * @param string $slug
+     */
     private function generateSlug($slug)
     {
         $slug = $this->slugify($slug);
@@ -56,6 +75,10 @@ class Slug extends Behavior
         }
     }
 
+    /**
+     * @param string $slug
+     * @return string
+     */
     private function slugify($slug)
     {
         return $this->translit
@@ -63,6 +86,10 @@ class Slug extends Behavior
             : $this->slug($slug);
     }
 
+    /**
+     * @param string $string
+     * @return string
+     */
     private function slug($string)
     {
         $string = preg_replace('/[^\p{L}\p{Nd}]+/u', $this->replacement, $string);
@@ -72,6 +99,9 @@ class Slug extends Behavior
             : $string;
     }
 
+    /**
+     * @return bool
+     */
     private function checkUniqueSlug()
     {
         $model = DynamicModel::validateData(
