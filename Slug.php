@@ -70,7 +70,7 @@ class Slug extends Behavior
         if ($this->unique) {
             $suffix = 1;
             while (!$this->checkUniqueSlug()) {
-                $this->owner->{$this->slug_attribute} = $slug . $this->replacement . ++$suffix;
+                $this->owner->{$this->slug_attribute} = $slug . $this->replacement . $suffix++;
             }
         }
     }
@@ -104,9 +104,19 @@ class Slug extends Behavior
      */
     private function checkUniqueSlug()
     {
+        $primaryKeys = $this->owner->primaryKey();
+        $filter = ['not', []];
+        foreach ($primaryKeys as $primaryKey) {
+            $filter[1][$primaryKey] = $this->owner->$primaryKey;
+        }
         $model = DynamicModel::validateData(
             [$this->slug_attribute => $this->owner->{$this->slug_attribute}],
-            [[$this->slug_attribute, 'unique', 'targetClass' => $this->owner]]
+            [[
+                $this->slug_attribute,
+                'unique',
+                'targetClass' => $this->owner,
+                'filter' => $filter
+            ]]
         );
         return !$model->hasErrors($this->slug_attribute);
     }
