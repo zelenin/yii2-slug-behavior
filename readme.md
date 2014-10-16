@@ -8,15 +8,9 @@
 
 The preferred way to install this extension is through [Composer](http://getcomposer.org/).
 
-Either run
+Either run ```php composer.phar require zelenin/yii2-slug-behavior "dev-master"```
 
-	php composer.phar require zelenin/yii2-slug-behavior "dev-master"
-
-or add
-
-	"zelenin/yii2-slug-behavior": "dev-master"
-
-to the require section of your composer.json
+or add ```"zelenin/yii2-slug-behavior": "0.2.0"``` to the require section of your ```composer.json```
 
 ### Using
 
@@ -28,18 +22,20 @@ public function behaviors()
     return [
         'slug' => [
             'class' => 'Zelenin\yii\behaviors\Slug',
-            'source_attribute' => 'name',
-            'slug_attribute' => 'slug',
-
-            // optional params
+            'slugAttribute' => 'slug',
+            'attribute' => 'name',
+            // optional params (default values)
+            'ensureUnique' => true,
             'translit' => true,
             'replacement' => '-',
             'lowercase' => true,
-            'unique' => true
+
         ]
     ];
 }
 ```
+
+Info: attribute names was changed on 0.2.0 version.
 
 Slug may be generated from multiple and related attributes:
 
@@ -48,18 +44,9 @@ public function behaviors()
 {
     return [
         'slug' => [
-            'class' => 'Zelenin\yii\behaviors\Slug',
-            'source_attribute' => [
-                'name',
-                'language.name'
-            ],
-            'slug_attribute' => 'slug',
-
-            // optional params
-            'translit' => true,
-            'replacement' => '-',
-            'lowercase' => true,
-            'unique' => true
+            ...
+            'attribute' => ['name', 'language.username'],
+            ...
         ]
     ];
 }

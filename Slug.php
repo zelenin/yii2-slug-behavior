@@ -3,121 +3,129 @@
 namespace Zelenin\yii\behaviors;
 
 use dosamigos\transliterator\TransliteratorHelper;
-use yii\base\Behavior;
-use yii\base\DynamicModel;
+use Yii;
+use yii\base\InvalidConfigException;
+use yii\behaviors\SluggableBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Inflector;
+use yii\validators\UniqueValidator;
 
-class Slug extends Behavior
+class Slug extends SluggableBehavior
 {
-    /** @var string|array $source_attribute */
-    public $source_attribute = 'name';
-    /** @var string $slug_attribute */
-    public $slug_attribute = 'slug';
+    /** @var string */
+    public $slugAttribute = 'slug';
+    /** @var string|array */
+    public $attribute = 'name';
 
-    /** @var bool $translit */
+    /** @var bool */
+    public $ensureUnique = true;
+    /** @var bool */
     public $translit = true;
-    /** @var string $replacement */
+    /** @var string */
     public $replacement = '-';
-    /** @var bool $lowercase */
+    /** @var bool */
     public $lowercase = true;
-    /** @var bool $unique */
-    public $unique = true;
 
     /**
      * @inheritdoc
      */
-    public function events()
+    protected function getValue($event)
     {
-        return [
-            ActiveRecord::EVENT_BEFORE_VALIDATE => 'processSlug'
-        ];
-    }
+        $isNewSlug = true;
 
-    /**
-     * @param $event
-     */
-    public function processSlug($event)
-    {
-        $attribute = empty($this->owner->{$this->slug_attribute})
-            ? $this->source_attribute
-            : $this->slug_attribute;
-        is_array($attribute)
-            ? $this->generateSlug($this->getAttributeComponents($attribute))
-            : $this->generateSlug($this->owner->$attribute);
-    }
-
-    /**
-     * @param array $attributeNames
-     * @return string
-     */
-    private function getAttributeComponents($attributeNames)
-    {
-        $attributes = [];
-        foreach ($attributeNames as $attribute) {
-            $attributes[] = ArrayHelper::getValue($this->owner, $attribute);
+        if ($this->attribute !== null) {
+            $attributes = (array)$this->attribute;
+            /* @var $owner ActiveRecord */
+            $owner = $this->owner;
+            if (!$owner->getIsNewRecord() && !empty($owner->{$this->slugAttribute})) {
+                $isNewSlug = false;
+                foreach ($attributes as $attribute) {
+                    if ($owner->isAttributeChanged($attribute)) {
+                        $isNewSlug = true;
+                        break;
+                    }
+                }
+            }
+            if ($isNewSlug) {
+                $slugParts = [];
+                foreach ($attributes as $attribute) {
+                    $slugParts[] = ArrayHelper::getValue($this->owner, $attribute);
+                }
+                $slug = $this->slug(implode($this->replacement, $slugParts), $this->replacement, $this->lowercase);
+            } else {
+                $slug = $owner->{$this->slugAttribute};
+            }
+        } else {
+            $slug = parent::getValue($event);
         }
-        return implode($this->replacement, $attributes);
-    }
 
-    /**
-     * @param string $slug
-     */
-    private function generateSlug($slug)
-    {
-        $slug = $this->slugify($slug);
-        $this->owner->{$this->slug_attribute} = $slug;
-        if ($this->unique) {
-            $suffix = 1;
-            while (!$this->checkUniqueSlug()) {
-                $this->owner->{$this->slug_attribute} = $slug . $this->replacement . $suffix++;
+        if ($this->ensureUnique && $isNewSlug) {
+            $baseSlug = $slug;
+            $iteration = 0;
+            while (!$this->validateSlug($slug)) {
+                $iteration++;
+                $slug = $this->generateUniqueSlug($baseSlug, $iteration);
             }
         }
+        return $slug;
     }
 
     /**
-     * @param string $slug
+     * @param string $string
+     * @param string $replacement
+     * @param bool $lowercase
      * @return string
      */
-    private function slugify($slug)
+    private function slug($string, $replacement = '-', $lowercase = true)
     {
-        return $this->translit
-            ? $this->slug(TransliteratorHelper::process($slug))
-            : $this->slug($slug);
+        if ($this->translit) {
+            $string = $this->transliterate($string);
+            $string = preg_replace('/[^a-zA-Z0-9=\s—–-]+/u', '', $string);
+        }
+
+        $string = preg_replace('/[=\s—–-]+/u', $replacement, $string);
+        $string = trim($string, $replacement);
+        return $lowercase ? mb_strtolower($string) : $string;
     }
 
     /**
      * @param string $string
      * @return string
      */
-    private function slug($string)
+    private function transliterate($string)
     {
-        $string = preg_replace('/[^\p{L}\p{Nd}]+/u', $this->replacement, $string);
-        $string = trim($string, $this->replacement);
-        return $this->lowercase
-            ? strtolower($string)
-            : $string;
+        return extension_loaded('intl')
+            ? transliterator_transliterate(Inflector::$transliterator, $string)
+            : TransliteratorHelper::process($string);
     }
 
     /**
+     * @param string $slug
      * @return bool
+     * @throws InvalidConfigException
      */
-    private function checkUniqueSlug()
+    private function validateSlug($slug)
     {
-        $primaryKeys = $this->owner->primaryKey();
-        $filter = ['not', []];
-        foreach ($primaryKeys as $primaryKey) {
-            $filter[1][$primaryKey] = $this->owner->$primaryKey;
-        }
-        $model = DynamicModel::validateData(
-            [$this->slug_attribute => $this->owner->{$this->slug_attribute}],
-            [[
-                $this->slug_attribute,
-                'unique',
-                'targetClass' => $this->owner,
-                'filter' => $filter
-            ]]
-        );
-        return !$model->hasErrors($this->slug_attribute);
+        $validator = Yii::createObject(array_merge(['class' => UniqueValidator::className()], $this->uniqueValidator));
+
+        $model = clone $this->owner;
+        $model->clearErrors();
+        $model->{$this->slugAttribute} = $slug;
+
+        $validator->validateAttribute($model, $this->slugAttribute);
+        return !$model->hasErrors();
+    }
+
+    /**
+     * @param string $baseSlug
+     * @param int $iteration
+     * @return string
+     */
+    private function generateUniqueSlug($baseSlug, $iteration)
+    {
+        return is_callable($this->uniqueSlugGenerator)
+            ? call_user_func($this->uniqueSlugGenerator, $baseSlug, $iteration, $this->owner)
+            : $baseSlug . $this->replacement . ($iteration + 1);
     }
 }
