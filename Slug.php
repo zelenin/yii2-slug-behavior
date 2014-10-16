@@ -109,6 +109,7 @@ class Slug extends SluggableBehavior
     {
         $validator = Yii::createObject(array_merge(['class' => UniqueValidator::className()], $this->uniqueValidator));
 
+        /** @var ActiveRecord $model */
         $model = clone $this->owner;
         $model->clearErrors();
         $model->{$this->slugAttribute} = $slug;
