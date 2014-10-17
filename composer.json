@@ -1,7 +1,7 @@
 {
 	"name": "zelenin/yii2-slug-behavior",
 	"description": "Yii2 slug behavior",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"type": "yii2-extension",
 	"keywords": ["yii", "yii2", "slug", "behavior"],
 	"homepage": "https://github.com/zelenin/yii2-slug-behavior",
