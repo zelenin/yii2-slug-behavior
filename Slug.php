@@ -8,7 +8,6 @@ use yii\base\InvalidConfigException;
 use yii\behaviors\SluggableBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
-use yii\helpers\Inflector;
 use yii\validators\UniqueValidator;
 
 class Slug extends SluggableBehavior
@@ -95,9 +94,7 @@ class Slug extends SluggableBehavior
      */
     private function transliterate($string)
     {
-        return extension_loaded('intl')
-            ? transliterator_transliterate(Inflector::$transliterator, $string)
-            : TransliteratorHelper::process($string);
+        return TransliteratorHelper::process($string);
     }
 
     /**
