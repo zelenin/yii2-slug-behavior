@@ -1,11 +1,11 @@
 {
 	"name": "zelenin/yii2-slug-behavior",
 	"description": "Yii2 slug behavior",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"type": "yii2-extension",
 	"keywords": ["yii", "yii2", "slug", "behavior"],
 	"homepage": "https://github.com/zelenin/yii2-slug-behavior",
-	"time": "2014-10-17",
+	"time": "2014-10-25",
 	"license": "MIT",
 	"authors": [
 		{
@@ -28,6 +28,5 @@
 		"psr-4": {
 			"Zelenin\\yii\\behaviors\\": ""
 		}
-	},
-	"minimum-stability": "stable"
+	}
 }
