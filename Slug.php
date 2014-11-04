@@ -25,7 +25,12 @@ class Slug extends SluggableBehavior
     public $replacement = '-';
     /** @var bool */
     public $lowercase = true;
-
+    /**
+     * @var string
+     * @link http://userguide.icu-project.org/transforms/general
+     */
+    public $transliterateOptions = '';
+    /** @var bool */
     private $notPrimaryKey = true;
 
     public function attach($owner)
@@ -124,7 +129,16 @@ class Slug extends SluggableBehavior
      */
     private function transliterate($string)
     {
-        return TransliteratorHelper::process($string);
+        if( extension_loaded('intl') === true ) {
+            $options = rtrim(trim($this->transliterateOptions),';');
+            if($options) {
+                $options = $options . ';';
+            }
+            $options .= 'Any-Latin; Latin-ASCII; NFD; [:Nonspacing Mark:] Remove; NFC;';
+            return transliterator_transliterate($options, $string);
+        } else {
+            return TransliteratorHelper::process($string);
+        }
     }
 
     /**

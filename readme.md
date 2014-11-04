@@ -8,9 +8,9 @@
 
 The preferred way to install this extension is through [Composer](http://getcomposer.org/).
 
-Either run ```php composer.phar require zelenin/yii2-slug-behavior "0.2.*"```
+Either run ```php composer.phar require zelenin/yii2-slug-behavior "~0.2@stable"```
 
-or add ```"zelenin/yii2-slug-behavior": "0.2.*"``` to the require section of your ```composer.json```
+or add ```"zelenin/yii2-slug-behavior": "~0.2@stable"``` to the require section of your ```composer.json```
 
 ### Using
 
@@ -24,12 +24,13 @@ public function behaviors()
             'class' => 'Zelenin\yii\behaviors\Slug',
             'slugAttribute' => 'slug',
             'attribute' => 'name',
-            // optional params (default values)
+            // optional params
             'ensureUnique' => true,
             'translit' => true,
             'replacement' => '-',
             'lowercase' => true,
-
+            // If intl extension is enabled, see (http://userguide.icu-project.org/transforms/general). 
+            'transliterateOptions' => 'Russian-Latin/BGN;'
         ]
     ];
 }
