@@ -35,7 +35,10 @@ class Slug extends SluggableBehavior
 
     public function attach($owner)
     {
-        $primaryKey = array_shift($owner->primaryKey());
+        $primaryKey = $owner->primaryKey();
+        $primaryKey = is_array($primaryKey)
+            ? array_shift($primaryKey)
+            : $primaryKey;
         if (in_array($primaryKey, $this->attribute) && $owner->getIsNewRecord()) {
             $this->attributes[ActiveRecord::EVENT_AFTER_INSERT] = $this->slugAttribute;
             $this->notPrimaryKey = false;
