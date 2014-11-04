@@ -26,6 +26,19 @@ class Slug extends SluggableBehavior
     /** @var bool */
     public $lowercase = true;
 
+    private $notPrimaryKey = true;
+
+    public function attach($owner)
+    {
+        $primaryKey = array_shift($owner->primaryKey());
+        if( in_array($primaryKey,$this->attribute) && $owner->getIsNewRecord()) {
+            $this->attributes[ActiveRecord::EVENT_AFTER_INSERT] = $this->slugAttribute;
+            $this->notPrimaryKey = false;
+        }
+
+        parent::attach($owner);
+    }
+
     /**
      * @inheritdoc
      */
@@ -37,6 +50,11 @@ class Slug extends SluggableBehavior
             $attributes = (array)$this->attribute;
             /* @var $owner ActiveRecord */
             $owner = $this->owner;
+
+            if($this->notPrimaryKeyCheckAndNotIsNewRecord()) {
+                $owner->{$this->slugAttribute} = null;
+            }
+
             if (!$owner->getIsNewRecord() && !empty($owner->{$this->slugAttribute})) {
                 $isNewSlug = false;
                 foreach ($attributes as $attribute) {
@@ -46,6 +64,7 @@ class Slug extends SluggableBehavior
                     }
                 }
             }
+
             if ($isNewSlug) {
                 $slugParts = [];
                 foreach ($attributes as $attribute) {
@@ -67,7 +86,18 @@ class Slug extends SluggableBehavior
                 $slug = $this->generateUniqueSlug($baseSlug, $iteration);
             }
         }
+
+        if($this->notPrimaryKeyCheckAndNotIsNewRecord()) {
+            $owner->{$this->slugAttribute} = $slug;
+            $owner->save(false, [$this->slugAttribute]);
+        }
+
         return $slug;
+    }
+
+    private function notPrimaryKeyCheckAndNotIsNewRecord()
+    {
+        return !$this->notPrimaryKey && !$this->owner->getIsNewRecord();
     }
 
     /**
