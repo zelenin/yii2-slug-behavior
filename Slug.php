@@ -36,7 +36,7 @@ class Slug extends SluggableBehavior
     public function attach($owner)
     {
         $primaryKey = array_shift($owner->primaryKey());
-        if( in_array($primaryKey,$this->attribute) && $owner->getIsNewRecord()) {
+        if (in_array($primaryKey, $this->attribute) && $owner->getIsNewRecord()) {
             $this->attributes[ActiveRecord::EVENT_AFTER_INSERT] = $this->slugAttribute;
             $this->notPrimaryKey = false;
         }
@@ -56,7 +56,7 @@ class Slug extends SluggableBehavior
             /* @var $owner ActiveRecord */
             $owner = $this->owner;
 
-            if($this->notPrimaryKeyCheckAndNotIsNewRecord()) {
+            if ($this->notPrimaryKeyCheckAndNotIsNewRecord()) {
                 $owner->{$this->slugAttribute} = null;
             }
 
@@ -79,6 +79,11 @@ class Slug extends SluggableBehavior
             } else {
                 $slug = $owner->{$this->slugAttribute};
             }
+
+            if ($this->notPrimaryKeyCheckAndNotIsNewRecord()) {
+                $owner->{$this->slugAttribute} = $slug;
+                $owner->save(false, [$this->slugAttribute]);
+            }
         } else {
             $slug = parent::getValue($event);
         }
@@ -92,14 +97,12 @@ class Slug extends SluggableBehavior
             }
         }
 
-        if($this->notPrimaryKeyCheckAndNotIsNewRecord()) {
-            $owner->{$this->slugAttribute} = $slug;
-            $owner->save(false, [$this->slugAttribute]);
-        }
-
         return $slug;
     }
 
+    /**
+     * @return bool
+     */
     private function notPrimaryKeyCheckAndNotIsNewRecord()
     {
         return !$this->notPrimaryKey && !$this->owner->getIsNewRecord();
@@ -129,9 +132,9 @@ class Slug extends SluggableBehavior
      */
     private function transliterate($string)
     {
-        if( extension_loaded('intl') === true ) {
-            $options = rtrim(trim($this->transliterateOptions),';');
-            if($options) {
+        if (extension_loaded('intl') === true) {
+            $options = rtrim(trim($this->transliterateOptions), ';');
+            if ($options) {
                 $options = $options . ';';
             }
             $options .= 'Any-Latin; Latin-ASCII; NFD; [:Nonspacing Mark:] Remove; NFC;';
