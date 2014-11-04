@@ -33,6 +33,9 @@ class Slug extends SluggableBehavior
     /** @var bool */
     private $notPrimaryKey = true;
 
+    /**
+     * @inheritdoc
+     */
     public function attach($owner)
     {
         $primaryKey = $owner->primaryKey();
