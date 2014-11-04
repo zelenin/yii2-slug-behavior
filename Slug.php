@@ -31,7 +31,7 @@ class Slug extends SluggableBehavior
      */
     public $transliterateOptions = '';
     /** @var bool */
-    private $notPrimaryKey = true;
+    private $slugIsEmpty = false;
 
     /**
      * @inheritdoc
@@ -44,7 +44,6 @@ class Slug extends SluggableBehavior
             : $primaryKey;
         if (in_array($primaryKey, $this->attribute) && $owner->getIsNewRecord()) {
             $this->attributes[ActiveRecord::EVENT_AFTER_INSERT] = $this->slugAttribute;
-            $this->notPrimaryKey = false;
         }
 
         parent::attach($owner);
@@ -55,46 +54,34 @@ class Slug extends SluggableBehavior
      */
     protected function getValue($event)
     {
-        $isNewSlug = true;
+        /* @var $owner ActiveRecord */
+        $owner = $this->owner;
 
-        if ($this->attribute !== null) {
-            $attributes = (array)$this->attribute;
-            /* @var $owner ActiveRecord */
-            $owner = $this->owner;
-
-            if ($this->notPrimaryKeyCheckAndNotIsNewRecord()) {
-                $owner->{$this->slugAttribute} = null;
+        if (!empty($owner->{$this->slugAttribute}) && !$this->slugIsEmpty) {
+            $slug = $owner->{$this->slugAttribute};
+        } else {
+            if ($owner->getIsNewRecord()) {
+                $this->slugIsEmpty = true;
             }
+            if ($this->attribute !== null) {
+                $attributes = (array)$this->attribute;
 
-            if (!$owner->getIsNewRecord() && !empty($owner->{$this->slugAttribute})) {
-                $isNewSlug = false;
-                foreach ($attributes as $attribute) {
-                    if ($owner->isAttributeChanged($attribute)) {
-                        $isNewSlug = true;
-                        break;
-                    }
-                }
-            }
-
-            if ($isNewSlug) {
                 $slugParts = [];
                 foreach ($attributes as $attribute) {
                     $slugParts[] = ArrayHelper::getValue($this->owner, $attribute);
                 }
                 $slug = $this->slug(implode($this->replacement, $slugParts), $this->replacement, $this->lowercase);
-            } else {
-                $slug = $owner->{$this->slugAttribute};
-            }
 
-            if ($this->notPrimaryKeyCheckAndNotIsNewRecord()) {
-                $owner->{$this->slugAttribute} = $slug;
-                $owner->save(false, [$this->slugAttribute]);
+                if (!$owner->getIsNewRecord() && $this->slugIsEmpty) {
+                    $owner->{$this->slugAttribute} = $slug;
+                    $owner->save(false, [$this->slugAttribute]);
+                }
+            } else {
+                $slug = parent::getValue($event);
             }
-        } else {
-            $slug = parent::getValue($event);
         }
 
-        if ($this->ensureUnique && $isNewSlug) {
+        if ($this->ensureUnique) {
             $baseSlug = $slug;
             $iteration = 0;
             while (!$this->validateSlug($slug)) {
@@ -104,14 +91,6 @@ class Slug extends SluggableBehavior
         }
 
         return $slug;
-    }
-
-    /**
-     * @return bool
-     */
-    private function notPrimaryKeyCheckAndNotIsNewRecord()
-    {
-        return !$this->notPrimaryKey && !$this->owner->getIsNewRecord();
     }
 
     /**
