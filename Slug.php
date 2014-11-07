@@ -38,6 +38,7 @@ class Slug extends SluggableBehavior
      */
     public function attach($owner)
     {
+        $this->attribute = (array)$this->attribute;
         $primaryKey = $owner->primaryKey();
         $primaryKey = is_array($primaryKey)
             ? array_shift($primaryKey)
@@ -64,7 +65,7 @@ class Slug extends SluggableBehavior
                 $this->slugIsEmpty = true;
             }
             if ($this->attribute !== null) {
-                $attributes = (array)$this->attribute;
+                $attributes = $this->attribute;
 
                 $slugParts = [];
                 foreach ($attributes as $attribute) {
