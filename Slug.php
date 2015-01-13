@@ -26,7 +26,7 @@ class Slug extends SluggableBehavior
     /** @var bool */
     public $lowercase = true;
     /** @var bool */
-    public $forceUpdate = false;
+    public $immutable = true;
     /**
      * @var string
      * @link http://userguide.icu-project.org/transforms/general
@@ -60,7 +60,7 @@ class Slug extends SluggableBehavior
         /* @var $owner ActiveRecord */
         $owner = $this->owner;
 
-        if (!empty($owner->{$this->slugAttribute}) && !$this->slugIsEmpty && !$this->forceUpdate) {
+        if (!empty($owner->{$this->slugAttribute}) && !$this->slugIsEmpty && $this->immutable) {
             $slug = $owner->{$this->slugAttribute};
         } else {
             if ($owner->getIsNewRecord()) {

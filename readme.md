@@ -29,7 +29,7 @@ public function behaviors()
             'translit' => true,
             'replacement' => '-',
             'lowercase' => true,
-            'forceUpdate' => true,
+            'immutable' => false,
             // If intl extension is enabled, see http://userguide.icu-project.org/transforms/general. 
             'transliterateOptions' => 'Russian-Latin/BGN;'
         ]
