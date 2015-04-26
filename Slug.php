@@ -37,6 +37,7 @@ class Slug extends SluggableBehavior
 
     /**
      * @inheritdoc
+     * @param ActiveRecord $owner
      */
     public function attach($owner)
     {
@@ -106,10 +107,10 @@ class Slug extends SluggableBehavior
     {
         if ($this->translit) {
             $string = $this->transliterate($string);
-            $string = preg_replace('/[^a-zA-Z0-9=\s—–-]+/u', '', $string);
+            $string = preg_replace('/[^\/\\\a-zA-Z0-9=\s—–-]+/u', '', $string);
         }
 
-        $string = preg_replace('/[=\s—–-]+/u', $replacement, $string);
+        $string = preg_replace('/[\/\\\=\s—–-]+/u', $replacement, $string);
         $string = trim($string, $replacement);
         return $lowercase ? mb_strtolower($string) : $string;
     }
