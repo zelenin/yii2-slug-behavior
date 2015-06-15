@@ -61,7 +61,9 @@ class Slug extends SluggableBehavior
         /* @var $owner ActiveRecord */
         $owner = $this->owner;
 
-        if (!empty($owner->{$this->slugAttribute}) && !$this->slugIsEmpty && $this->immutable) {
+        $immutable = is_callable($this->immutable) ? call_user_func($this->immutable) : $this->immutable;
+        
+        if (!empty($owner->{$this->slugAttribute}) && !$this->slugIsEmpty && $immutable) {
             $slug = $owner->{$this->slugAttribute};
         } else {
             if ($owner->getIsNewRecord()) {
