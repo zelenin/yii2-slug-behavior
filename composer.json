@@ -1,7 +1,6 @@
 {
     "name": "zelenin/yii2-slug-behavior",
     "description": "Yii2 slug behavior",
-    "version": "0.3.0",
     "type": "yii2-extension",
     "keywords": [
         "yii",
@@ -10,7 +9,6 @@
         "behavior"
     ],
     "homepage": "https://github.com/zelenin/yii2-slug-behavior",
-    "time": "2015-04-26",
     "license": "MIT",
     "authors": [
         {
@@ -25,8 +23,8 @@
         "source": "https://github.com/zelenin/yii2-slug-behavior"
     },
     "require": {
-        "yiisoft/yii2": "2.*",
-        "2amigos/yii2-transliterator-helper": "0.1.*"
+        "yiisoft/yii2": "~2.0",
+        "2amigos/yii2-transliterator-helper": "~0.1"
     },
     "autoload": {
         "psr-4": {
