@@ -31,7 +31,7 @@ class Slug extends SluggableBehavior
      * @var string
      * @link http://userguide.icu-project.org/transforms/general
      */
-    public $transliterateOptions = '';
+    public $transliterateOptions = 'Any-Latin; Latin-ASCII; NFD; [:Nonspacing Mark:] Remove; NFC;';
     /** @var bool */
     private $slugIsEmpty = false;
 
@@ -122,12 +122,7 @@ class Slug extends SluggableBehavior
     private function transliterate($string)
     {
         if (extension_loaded('intl') === true) {
-            $options = rtrim(trim($this->transliterateOptions), ';');
-            if ($options) {
-                $options = $options . ';';
-            }
-            $options .= 'Any-Latin; Latin-ASCII; NFD; [:Nonspacing Mark:] Remove; NFC;';
-            return transliterator_transliterate($options, $string);
+            return transliterator_transliterate($this->transliterateOptions, $string);
         } else {
             return TransliteratorHelper::process($string);
         }
