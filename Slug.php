@@ -12,25 +12,45 @@ use Zelenin\Slugifier\Slugifier;
 
 class Slug extends SluggableBehavior
 {
-    /** @var string */
+    /**
+     * @var string
+     */
     public $slugAttribute = 'slug';
-    /** @var string|array */
+
+    /**
+     * @var string|array
+     */
     public $attribute = 'name';
 
-    /** @var bool */
+    /**
+     * @var bool
+     */
     public $ensureUnique = true;
-    /** @var string */
+
+    /**
+     * @var string
+     */
     public $replacement = '-';
-    /** @var bool */
+
+    /**
+     * @var bool
+     */
     public $lowercase = true;
-    /** @var bool */
+
+    /**
+     * @var bool
+     */
     public $immutable = true;
+
     /**
      * @var string
      * @link http://userguide.icu-project.org/transforms/general
      */
-    public $transliterateOptions = 'Any-Latin; Latin-ASCII; NFD; [:Nonspacing Mark:] Remove; NFC;';
-    /** @var bool */
+    public $transliterateOptions = null;
+
+    /**
+     * @var bool
+     */
     private $slugIsEmpty = false;
 
     /**
@@ -41,10 +61,8 @@ class Slug extends SluggableBehavior
     {
         $this->attribute = (array)$this->attribute;
         $primaryKey = $owner->primaryKey();
-        $primaryKey = is_array($primaryKey)
-            ? array_shift($primaryKey)
-            : $primaryKey;
-        if (in_array($primaryKey, $this->attribute) && $owner->getIsNewRecord()) {
+        $primaryKey = is_array($primaryKey) ? array_shift($primaryKey) : $primaryKey;
+        if (in_array($primaryKey, $this->attribute, true) && $owner->getIsNewRecord()) {
             $this->attributes[ActiveRecord::EVENT_AFTER_INSERT] = $this->slugAttribute;
         }
 
@@ -72,7 +90,7 @@ class Slug extends SluggableBehavior
                 foreach ($attributes as $attribute) {
                     $slugParts[] = ArrayHelper::getValue($this->owner, $attribute);
                 }
-                $slug = $this->slug(implode($this->replacement, $slugParts), $this->replacement, $this->lowercase);
+                $slug = $this->slugify(implode($this->replacement, $slugParts), $this->replacement, $this->lowercase);
 
                 if (!$owner->getIsNewRecord() && $this->slugIsEmpty) {
                     $owner->{$this->slugAttribute} = $slug;
@@ -99,12 +117,15 @@ class Slug extends SluggableBehavior
      * @param string $string
      * @param string $replacement
      * @param bool $lowercase
+     *
      * @return string
      */
-    private function slug($string, $replacement = '-', $lowercase = true)
+    private function slugify($string, $replacement = '-', $lowercase = true)
     {
         $slugifier = new Slugifier($string);
-        $slugifier->transliterateOptions = $this->transliterateOptions;
+        if ($this->transliterateOptions === null) {
+            $slugifier->transliterateOptions = $this->transliterateOptions;
+        }
         $slugifier->replacement = $replacement;
         $slugifier->lowercase = $lowercase;
         return $slugifier->getSlug();
@@ -112,7 +133,9 @@ class Slug extends SluggableBehavior
 
     /**
      * @param string $slug
+     *
      * @return bool
+     *
      * @throws InvalidConfigException
      */
     private function validateSlug($slug)
@@ -131,6 +154,7 @@ class Slug extends SluggableBehavior
     /**
      * @param string $baseSlug
      * @param int $iteration
+     *
      * @return string
      */
     private function generateUniqueSlug($baseSlug, $iteration)
