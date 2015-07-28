@@ -2,13 +2,13 @@
 
 namespace Zelenin\yii\behaviors;
 
-use dosamigos\transliterator\TransliteratorHelper;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\behaviors\SluggableBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\validators\UniqueValidator;
+use Zelenin\Slugifier\Slugifier;
 
 class Slug extends SluggableBehavior
 {
@@ -19,8 +19,6 @@ class Slug extends SluggableBehavior
 
     /** @var bool */
     public $ensureUnique = true;
-    /** @var bool */
-    public $translit = true;
     /** @var string */
     public $replacement = '-';
     /** @var bool */
@@ -105,27 +103,11 @@ class Slug extends SluggableBehavior
      */
     private function slug($string, $replacement = '-', $lowercase = true)
     {
-        if ($this->translit) {
-            $string = $this->transliterate($string);
-            $string = preg_replace('/[^\/\\\a-zA-Z0-9=\s—–-]+/u', '', $string);
-        }
-
-        $string = preg_replace('/[\/\\\=\s—–-]+/u', $replacement, $string);
-        $string = trim($string, $replacement);
-        return $lowercase ? mb_strtolower($string) : $string;
-    }
-
-    /**
-     * @param string $string
-     * @return string
-     */
-    private function transliterate($string)
-    {
-        if (extension_loaded('intl') === true) {
-            return transliterator_transliterate($this->transliterateOptions, $string);
-        } else {
-            return TransliteratorHelper::process($string);
-        }
+        $slugifier = new Slugifier($string);
+        $slugifier->transliterateOptions = $this->transliterateOptions;
+        $slugifier->replacement = $replacement;
+        $slugifier->lowercase = $lowercase;
+        return $slugifier->getSlug();
     }
 
     /**
