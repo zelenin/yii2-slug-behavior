@@ -123,7 +123,7 @@ class Slug extends SluggableBehavior
     private function slugify($string, $replacement = '-', $lowercase = true)
     {
         $slugifier = new Slugifier($string);
-        if ($this->transliterateOptions === null) {
+        if ($this->transliterateOptions !== null) {
             $slugifier->transliterateOptions = $this->transliterateOptions;
         }
         $slugifier->replacement = $replacement;
