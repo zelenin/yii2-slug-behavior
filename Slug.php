@@ -8,7 +8,7 @@ use yii\behaviors\SluggableBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\validators\UniqueValidator;
-use Zelenin\Slugifier\Slugifier;
+use Zelenin\yii\behaviors\Service\Slugifier;
 
 class Slug extends SluggableBehavior
 {
@@ -86,10 +86,10 @@ class Slug extends SluggableBehavior
             if ($this->attribute !== null) {
                 $attributes = $this->attribute;
 
-                $slugParts = [];
-                foreach ($attributes as $attribute) {
-                    $slugParts[] = ArrayHelper::getValue($this->owner, $attribute);
-                }
+                $slugParts = array_map(function ($attribute) {
+                    return ArrayHelper::getValue($this->owner, $attribute);
+                }, $attributes);
+
                 $slug = $this->slugify(implode($this->replacement, $slugParts), $this->replacement, $this->lowercase);
 
                 if (!$owner->getIsNewRecord() && $this->slugIsEmpty) {
@@ -122,13 +122,8 @@ class Slug extends SluggableBehavior
      */
     private function slugify($string, $replacement = '-', $lowercase = true)
     {
-        $slugifier = new Slugifier($string);
-        if ($this->transliterateOptions !== null) {
-            $slugifier->transliterateOptions = $this->transliterateOptions;
-        }
-        $slugifier->replacement = $replacement;
-        $slugifier->lowercase = $lowercase;
-        return $slugifier->getSlug();
+        $transliterateOptions = $this->transliterateOptions !== null ? $this->transliterateOptions : 'Any-Latin; Latin-ASCII; NFD; [:Nonspacing Mark:] Remove; NFKC;';
+        return (new Slugifier($transliterateOptions, $replacement, $lowercase))->slugify($string);
     }
 
     /**

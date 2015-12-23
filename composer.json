@@ -3,7 +3,6 @@
     "description": "Yii2 slug behavior",
     "type": "yii2-extension",
     "keywords": [
-        "yii",
         "yii2",
         "slug",
         "behavior"
@@ -24,7 +23,7 @@
     },
     "require": {
         "yiisoft/yii2": "~2.0",
-        "zelenin/slugifier": "~0.0"
+        "zelenin/string": "~0.0.0"
     },
     "autoload": {
         "psr-4": {

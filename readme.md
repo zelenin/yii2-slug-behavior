@@ -8,9 +8,9 @@
 
 The preferred way to install this extension is through [Composer](http://getcomposer.org/).
 
-Either run ```php composer.phar require zelenin/yii2-slug-behavior "~1.0@stable"```
+Either run ```php composer.phar require zelenin/yii2-slug-behavior "~1.5.0"```
 
-or add ```"zelenin/yii2-slug-behavior": "~1.0@stable"``` to the require section of your ```composer.json```
+or add ```"zelenin/yii2-slug-behavior": "~1.5.0"``` to the require section of your ```composer.json```
 
 ### Using
 
