@@ -22,7 +22,7 @@
         "source": "https://github.com/zelenin/yii2-slug-behavior"
     },
     "require": {
-        "yiisoft/yii2": "~2.0",
+        "yiisoft/yii2": "~2.0.7",
         "zelenin/string": "~0.0.0"
     },
     "autoload": {

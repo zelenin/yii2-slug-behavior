@@ -3,11 +3,9 @@
 namespace Zelenin\yii\behaviors;
 
 use Yii;
-use yii\base\InvalidConfigException;
 use yii\behaviors\SluggableBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
-use yii\validators\UniqueValidator;
 use Zelenin\yii\behaviors\Service\Slugifier;
 
 class Slug extends SluggableBehavior
@@ -127,32 +125,12 @@ class Slug extends SluggableBehavior
     }
 
     /**
-     * @param string $slug
-     *
-     * @return bool
-     *
-     * @throws InvalidConfigException
-     */
-    private function validateSlug($slug)
-    {
-        $validator = Yii::createObject(array_merge(['class' => UniqueValidator::className()], $this->uniqueValidator));
-
-        /** @var ActiveRecord $model */
-        $model = clone $this->owner;
-        $model->clearErrors();
-        $model->{$this->slugAttribute} = $slug;
-
-        $validator->validateAttribute($model, $this->slugAttribute);
-        return !$model->hasErrors();
-    }
-
-    /**
      * @param string $baseSlug
      * @param int $iteration
      *
      * @return string
      */
-    private function generateUniqueSlug($baseSlug, $iteration)
+    protected function generateUniqueSlug($baseSlug, $iteration)
     {
         return is_callable($this->uniqueSlugGenerator)
             ? call_user_func($this->uniqueSlugGenerator, $baseSlug, $iteration, $this->owner)
