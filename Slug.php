@@ -92,7 +92,7 @@ class Slug extends SluggableBehavior
 
                 if (!$owner->getIsNewRecord() && $this->slugIsEmpty) {
                     $owner->{$this->slugAttribute} = $slug;
-                    $owner->save(false, [$this->slugAttribute]);
+                    $owner->updateAttributes([$this->slugAttribute]);
                 }
             } else {
                 $slug = parent::getValue($event);
