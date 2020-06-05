@@ -50,6 +50,13 @@ class Slug extends SluggableBehavior
      * @var bool
      */
     private $slugIsEmpty = false;
+    
+    
+     /**
+     * Maximum length of attribute slug
+     * @var int
+     */
+    public $maxLength      = 64;
 
     /**
      * @inheritdoc
@@ -120,6 +127,10 @@ class Slug extends SluggableBehavior
      */
     private function slugify($string, $replacement = '-', $lowercase = true)
     {
+        $words_array =  explode(" ", $string);
+        if (count($words_array) > $this->maxLength) {
+            $string = implode($replacement, array_slice($words_array, 0, $this->maxLength));
+        }
         $transliterateOptions = $this->transliterateOptions !== null ? $this->transliterateOptions : 'Any-Latin; Latin-ASCII; NFD; [:Nonspacing Mark:] Remove; NFKC;';
         return (new Slugifier($transliterateOptions, $replacement, $lowercase))->slugify($string);
     }

@@ -28,6 +28,7 @@ public function behaviors()
             'ensureUnique' => true,
             'replacement' => '-',
             'lowercase' => true,
+            'maxLength'=>5,//default: 64
             'immutable' => false,
             // If intl extension is enabled, see http://userguide.icu-project.org/transforms/general. 
             'transliterateOptions' => 'Russian-Latin/BGN; Any-Latin; Latin-ASCII; NFD; [:Nonspacing Mark:] Remove; NFC;'
